@@ -4,30 +4,28 @@ import { ApolloProvider, getDataFromTree } from 'react-apollo'
 import Head from 'next/head'
 import initApollo from './initApollo'
 import fs from 'fs-jetpack'
-import {
-  isExport,
-  isServer,
-  getComponentDisplayName 
-} from './utils'
+import { isExport, getComponentDisplayName } from './utils'
 
-const getFileName = (name) =>  name.endsWith('/') ? `${name}index` : name
+const getFileName = name => (name.endsWith('/') ? `${name}index` : name)
 
 export default ComposedComponent => {
   return class WithData extends React.Component {
-    static displayName = `WithData(${getComponentDisplayName(ComposedComponent)})`
+    static displayName = `WithData(${getComponentDisplayName(
+      ComposedComponent
+    )})`
     static propTypes = {
       serverState: PropTypes.object.isRequired
     }
 
-    static async getInitialProps (ctx) {
-      let serverState = { }
+    static async getInitialProps(ctx) {
+      let serverState = {}
       // Evaluate the composed component's getInitialProps()
       let composedInitialProps = {}
       if (ComposedComponent.getInitialProps) {
         composedInitialProps = await ComposedComponent.getInitialProps(ctx)
       }
 
-      const url = {query: ctx.query, pathname: ctx.pathname}
+      const url = { query: ctx.query, pathname: ctx.pathname }
       // Run all GraphQL queries in the component tree
       // and extract the resulting data
       if (!process.browser) {
@@ -37,30 +35,38 @@ export default ComposedComponent => {
           // Run all GraphQL queries
           await getDataFromTree(
             <ApolloProvider client={apollo}>
-            <ComposedComponent url={url} {...composedInitialProps} />
+              <ComposedComponent url={url} {...composedInitialProps} />
             </ApolloProvider>
           )
         } catch (error) {
           // Prevent Apollo Client GraphQL errors from crashing SSR.
           // Handle them in components via the data.error prop:
           // http://dev.apollodata.com/react/api-queries.html#graphql-query-data-error
-          // console.log(error) 
+          // console.log(error)
         }
         // getDataFromTree does not call componentWillUnmount
         // head side effect therefore need to be cleared manually
         Head.rewind()
 
-        await fs.writeAsync(`./static/data${getFileName(url.pathname)}.json`, JSON.stringify(apollo.cache.extract(), null, 2).replace(/</g, '\\u003c'))
+        await fs.writeAsync(
+          `./static/data${getFileName(url.pathname)}.json`,
+          JSON.stringify(apollo.cache.extract(), null, 2).replace(
+            /</g,
+            '\\u003c'
+          )
+        )
         // Extract query data from the Apollo store
         serverState = {
-          data: apollo.cache.extract(),
+          data: apollo.cache.extract()
         }
       } else {
         if (process.browser && isExport()) {
-          const clientData = await fetch(`/static/data${getFileName(url.pathname)}.json`).then(res => res.json())
+          const clientData = await fetch(
+            `/static/data${getFileName(url.pathname)}.json`
+          ).then(res => res.json())
 
           serverState = {
-            data: clientData,
+            data: clientData
           }
         }
       }
@@ -71,12 +77,12 @@ export default ComposedComponent => {
       }
     }
 
-    constructor (props) {
+    constructor(props) {
       super(props)
       this.apollo = initApollo(this.props.serverState)
     }
 
-    render () {
+    render() {
       return (
         <ApolloProvider client={this.apollo}>
           <ComposedComponent {...this.props} />
