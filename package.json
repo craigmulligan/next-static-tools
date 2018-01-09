@@ -1,0 +1,62 @@
+{
+  "name": "next-static-tools",
+  "version": "0.0.0-development",
+  "description": "Tools for building grapqhl static sites with next.js",
+  "main": "./dist/index.js",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint './**/*.js'",
+    "build": "babel src --out-dir dist --copy-files",
+    "build:watch": "babel src --watch --out-dir dist --copy-files",
+    "prettier": "prettier --no-semi --single-quote --write './**/*.js'",
+    "prettier-check": "prettier-check --no-semi --single-quote --write './**/*.js'",
+    "semantic-release": "semantic-release"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hobochild/next-static-tools.git"
+  },
+  "keywords": [
+    "next.js",
+    "static-site",
+    "graphql"
+  ],
+  "author": "hobochild",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hobochild/next-static-tools/issues"
+  },
+  "browser": {
+    "fs-jetpack": false
+  },
+  "homepage": "https://github.com/hobochild/next-static-tools#readme",
+  "dependencies": {
+    "apollo-client-preset": "^1.0.1",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "fs-jetpack": "^1.2.0",
+    "graphql": "^0.12.3",
+    "graphql-tag": "^2.5.0",
+    "graphql-yoga": "^1.1.5",
+    "isomorphic-fetch": "^2.2.1",
+    "prop-types": "^15.5.8",
+    "react": "^16.2.0",
+    "react-apollo": "^2.0.0",
+    "react-dom": "^16.2.0",
+    "yargs": "^10.0.3"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "eslint": "^4.14.0",
+    "eslint-config-prettier": "^2.9.0",
+    "jest": "^22.0.4",
+    "prettier": "^1.9.2",
+    "prettier-check": "^2.0.0"
+  },
+  "peerDependencies": {
+    "next": "^4.2.1",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0"
+  }
+}
