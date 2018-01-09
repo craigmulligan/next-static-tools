@@ -2,21 +2,19 @@ import { ApolloClient } from 'apollo-client'
 import { HttpLink } from 'apollo-link-http'
 import { InMemoryCache } from 'apollo-cache-inmemory'
 import fetch from 'isomorphic-fetch'
-import gql from 'graphql-tag'
 import { isExport } from './utils'
-
-let apolloClient = null
 
 // Polyfill fetch() on the server (used by apollo-client)
 if (!process.browser) {
   global.fetch = fetch
 }
 
-const fetchPolicy = () => isExport() && process.browser ? 'cache-only' : 'cache-first'
+const fetchPolicy = () =>
+  isExport() && process.browser ? 'cache-only' : 'cache-first'
 
-function create (initialState = {}) {
-   const port = 4000 // we should make this configurable at some point
-   const endpoint = '/graphql' // this too.
+function create(initialState = {}) {
+  const port = 4000 // we should make this configurable at some point
+  const endpoint = '/graphql' // this too.
 
   return new ApolloClient({
     connectToDevTools: process.browser,
@@ -30,16 +28,16 @@ function create (initialState = {}) {
     cache: new InMemoryCache().restore(initialState.data),
     defaultOptions: {
       watchQuery: {
-        fetchPolicy: fetchPolicy() 
+        fetchPolicy: fetchPolicy()
       },
       query: {
-        fetchPolicy: fetchPolicy() 
-      },
+        fetchPolicy: fetchPolicy()
+      }
     }
   })
 }
 
-export default function initApollo (initialState) {
+export default function initApollo(initialState) {
   // Make sure to create a new client for every server-side request so that data
   // isn't shared between connections (which would be bad)
   if (!process.browser) {
@@ -48,8 +46,7 @@ export default function initApollo (initialState) {
   let apolloClient
   // Reuse client on the client-side
   if (process.browser) {
-    // currently renew client on every load cause we are manually merging state
-    apolloClient = create(initialState)
+    apolloClient = apolloClient || create(initialState)
   }
 
   return apolloClient
