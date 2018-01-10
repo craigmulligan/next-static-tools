@@ -31,7 +31,8 @@
     "fs-jetpack": false
   },
   "files": [
-    "dist/"
+    "dist/",
+   "./*.js" 
   ],
   "homepage": "https://github.com/hobochild/next-static-tools#readme",
   "dependencies": {
