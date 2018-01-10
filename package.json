@@ -30,6 +30,9 @@
   "browser": {
     "fs-jetpack": false
   },
+  "files": [
+    "dist/"
+  ],
   "homepage": "https://github.com/hobochild/next-static-tools#readme",
   "dependencies": {
     "apollo-client-preset": "^1.0.1",
