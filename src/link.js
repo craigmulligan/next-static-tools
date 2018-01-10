@@ -22,17 +22,19 @@ export default class LinkWithData extends Link {
         const value = props[propName]
 
         if (typeof value === 'string') {
-          execOnce(warn)(`Warning: You're using a string directly inside <Link>. This usage has been deprecated. Please add an <a> tag as child of <Link>`)
+          execOnce(warn)(
+            `Warning: You're using a string directly inside <Link>. This usage has been deprecated. Please add an <a> tag as child of <Link>`
+          )
         }
 
         return null
       }
     ]).isRequired,
     withData: PropTypes.bool // our custom prop
-  });
+  })
 
   // our custom prefetch method
-  async prefetch () {
+  async prefetch() {
     // if the prefetch prop is not defined or
     // we're running server side do nothing
     if (!this.props.prefetch) return
@@ -48,9 +50,7 @@ export default class LinkWithData extends Link {
     const href = resolve(pathname, url)
 
     const { query } =
-      typeof this.props.href !== 'string'
-        ? this.props.href
-        : parse(url, true)
+      typeof this.props.href !== 'string' ? this.props.href : parse(url, true)
 
     const Component = await Router.prefetch(href)
 

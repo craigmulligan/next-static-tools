@@ -3,7 +3,7 @@ const isDev = process.env.NEXT_STATIC_TOOLS_TEST_REPO ? true : false
 const TEST_REPO = process.env.NEXT_STATIC_TOOLS_TEST_REPO
 const relativeResolve = p => require.resolve(`${TEST_REPO}/node_modules/next/${p}`)
 
-const devConfig = {
+const devConfig = () => {
   plugins: [[
       require.resolve('babel-plugin-module-resolver'),
       {
@@ -16,4 +16,5 @@ const devConfig = {
   ]]
 }
 
-module.exports = isDev ? devConfig : {} 
+console.log(isDev)
+module.exports = isDev ? devConfig() : {} 
