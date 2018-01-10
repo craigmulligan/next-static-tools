@@ -8,9 +8,10 @@ notifications:
 node_js:
   - '8'
 script:
-  - yarn add next
+  - yarn add next react react-dom
   - yarn prettier-check
   - yarn lint
+  - yarn build
   - yarn test
 after_success:
   - npm run semantic-release
