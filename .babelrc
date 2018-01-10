@@ -1,6 +1,6 @@
 {
   "presets": [
-    "next/babel", "env"
+    "next/babel", "env", "./preset.js"
   ],
   "plugins": [
     "babel-plugin-transform-class-properties"

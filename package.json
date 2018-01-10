@@ -39,7 +39,9 @@
     "graphql-tag": "^2.5.0",
     "graphql-yoga": "^1.1.5",
     "isomorphic-fetch": "^2.2.1",
+    "next": "^4.2.2",
     "prop-types": "^15.5.8",
+    "prop-types-exact": "^1.1.1",
     "react": "^16.2.0",
     "react-apollo": "^2.0.0",
     "react-dom": "^16.2.0",
@@ -48,6 +50,7 @@
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-eslint": "7",
+    "babel-plugin-module-resolver": "^3.0.0",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "eslint": "^4.14.0",
     "eslint-config-prettier": "^2.9.0",
@@ -58,7 +61,6 @@
     "semantic-release": "^11.0.2"
   },
   "peerDependencies": {
-    "next": "^4.2.2",
     "react": "^16.2.0",
     "react-dom": "^16.2.0"
   }

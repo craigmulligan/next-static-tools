@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { ApolloProvider, getDataFromTree } from 'react-apollo'
-import Head from 'next/head'
+import Head from '/home/hobochild/Play/hobochild.tk/node_modules/next/head'
 import initApollo from './initApollo'
 import fs from 'fs-jetpack'
 import { isExport, getComponentDisplayName } from './utils'
