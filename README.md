@@ -5,4 +5,4 @@
 **Docs coming soon**
 
 ## Sites built with `next-static-tools`
-* [hobochild.tk](https://hobochild.tk)
+* [hobochild.tk](http://hobochild.tk)
