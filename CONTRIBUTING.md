@@ -14,7 +14,7 @@ yarn link next-static-tools
 
 The we export a path used by babel to setup some aliases
 ```
-export NEXT_STATIC_TOOLS_TEST_REPO=path/to/test/site
+export NEXT_STATIC_TOOLS_TEST_REPO=/path/to/test/site
 ```
 
 Then do your thang!

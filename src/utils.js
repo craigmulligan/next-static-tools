@@ -1,3 +1,6 @@
+import fs from 'fs-jetpack'
+import { join } from 'path'
+
 export const getComponentDisplayName = Component => {
   return Component.displayName || Component.name || 'Unknown'
 }
@@ -10,3 +13,7 @@ export const isExport = () =>
   (!isServer() &&
     typeof window.__NEXT_DATA__ !== 'undefined' &&
     window.__NEXT_DATA__.nextExport)
+
+export const getBuildId = nextDir => {
+  return fs.read(join(nextDir, 'BUILD_ID'), 'utf8')
+}
