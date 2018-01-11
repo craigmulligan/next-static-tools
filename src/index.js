@@ -31,6 +31,6 @@ export default ({ typeDefs, resolvers, app, options }) => {
   server.express.use(middleware(app.getRequestHandler(), options))
   server.start(options, () =>
     // eslint-disable-next-line no-console
-    console.log(`server is running on localhost:${options.port}`)
+    console.log(`server is running on http://localhost:${options.port}`)
   )
 }

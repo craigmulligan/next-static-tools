@@ -1,10 +1,11 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { ApolloProvider, getDataFromTree } from 'react-apollo'
-import Head from '/home/hobochild/Play/hobochild.tk/node_modules/next/head'
+import Head from 'next/head'
 import initApollo from './initApollo'
 import fs from 'fs-jetpack'
-import { isExport, getComponentDisplayName } from './utils'
+import { isExport, getComponentDisplayName, getBuildId } from './utils'
+import { resolve } from 'path'
 
 const getFileName = name => (name.endsWith('/') ? `${name}index` : name)
 
@@ -48,13 +49,20 @@ export default ComposedComponent => {
         // head side effect therefore need to be cleared manually
         Head.rewind()
 
+        // currently you can't configure the out dir
+        const outDir = resolve('./out')
+        const cachePath = `${outDir}/static/${getBuildId(
+          './.next'
+        )}/data${getFileName(url.pathname)}.json`
+
         await fs.writeAsync(
-          `./static/data${getFileName(url.pathname)}.json`,
+          cachePath,
           JSON.stringify(apollo.cache.extract(), null, 2).replace(
             /</g,
             '\\u003c'
           )
         )
+
         // Extract query data from the Apollo store
         serverState = {
           data: apollo.cache.extract()
@@ -62,7 +70,9 @@ export default ComposedComponent => {
       } else {
         if (process.browser && isExport()) {
           const clientData = await fetch(
-            `/static/data${getFileName(url.pathname)}.json`
+            `/static/${window.__NEXT_DATA__.buildId}/data${getFileName(
+              url.pathname
+            )}.json`
           ).then(res => res.json())
 
           serverState = {

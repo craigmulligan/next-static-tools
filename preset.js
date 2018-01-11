@@ -4,17 +4,19 @@ const TEST_REPO = process.env.NEXT_STATIC_TOOLS_TEST_REPO
 const relativeResolve = p => require.resolve(`${TEST_REPO}/node_modules/next/${p}`)
 
 const devConfig = () => {
-  plugins: [[
-      require.resolve('babel-plugin-module-resolver'),
-      {
-        alias: {
-          'next/link': relativeResolve('link'),
-          'next/head': relativeResolve('head'),
-          'next/router': relativeResolve('router')
+  return {
+    plugins: [[
+        require.resolve('babel-plugin-module-resolver'),
+        {
+          alias: {
+            'next/link': relativeResolve('link'),
+            'next/head': relativeResolve('head'),
+            'next/router': relativeResolve('router')
+          }
         }
-      }
-  ]]
+    ]]
+  }
 }
 
-console.log(isDev)
 module.exports = isDev ? devConfig() : {} 
+
