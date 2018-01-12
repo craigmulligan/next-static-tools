@@ -1,9 +1,6 @@
 const { parse } = require('url')
 const { GraphQLServer } = require('graphql-yoga')
-const { createReadStream } = require('fs')
-const { join } = require('path')
 const swPrecache = require('sw-precache')
-import fs from 'fs-jetpack'
 
 const middleware = (handle, options) => (req, res, next) => {
   const parsedUrl = parse(req.url, true)
@@ -14,10 +11,6 @@ const middleware = (handle, options) => (req, res, next) => {
     pathname.startsWith(options.endpoint)
   ) {
     next()
-  } else if (pathname === '/service-worker.js') {
-    handle(req, res, parsedUrl)
-    res.setHeader('content-type', 'text/javascript')
-    createReadStream(join('./static', '/service-worker.js')).pipe(res)
   } else if (pathname === '__NEXT_STATIC_TOOLS__') {
     res.send(options)
   } else {
@@ -30,9 +23,6 @@ const writeServiceWorker = rootDir => {
     swPrecache.write(
       `${rootDir}/service-worker.js`,
       {
-        staticFileGlobs: [
-          rootDir + '/**/*.{js,.json,html,css,png,jpg,gif,svg,eot,ttf,woff}'
-        ],
         stripPrefix: rootDir,
         runtimeCaching: [
           {
@@ -55,7 +45,8 @@ export default async ({ typeDefs, resolvers, app, options }) => {
   const defaults = {
     playground: '/playground',
     endpoint: '/graphql',
-    port: 5000
+    port: 5000,
+    outdir: './out'
   }
 
   options = {
@@ -66,7 +57,7 @@ export default async ({ typeDefs, resolvers, app, options }) => {
   process.env.__NEXT_STATIC_TOOLS__ = JSON.stringify(options)
 
   const server = new GraphQLServer({ typeDefs, resolvers })
-  await writeServiceWorker('./out')
+  await writeServiceWorker(options.outdir)
   server.express.use(middleware(app.getRequestHandler(), options))
   server.start(options, () =>
     // eslint-disable-next-line no-console
