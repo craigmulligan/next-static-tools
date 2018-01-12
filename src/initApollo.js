@@ -3,6 +3,7 @@ import { HttpLink } from 'apollo-link-http'
 import { InMemoryCache } from 'apollo-cache-inmemory'
 import fetch from 'isomorphic-fetch'
 import { isExport } from './utils'
+import get from 'lodash/get'
 
 // Polyfill fetch() on the server (used by apollo-client)
 if (!process.browser) {
@@ -12,9 +13,20 @@ if (!process.browser) {
 const fetchPolicy = () =>
   isExport() && process.browser ? 'cache-only' : 'cache-first'
 
+const getOpts = state => {
+  if (get(state, 'options')) {
+    return state.options
+  }
+
+  if (process.browser) {
+    return window.__NEXT_STATIC_TOOLS__
+  }
+}
+
 function create(initialState = {}) {
-  const port = 4000 // we should make this configurable at some point
-  const endpoint = '/graphql' // this too.
+  const options = getOpts(initialState)
+  const port = options.port || 4000 // we should make this configurable at some point
+  const endpoint = options.endpoint || '/graphql' // this too.
 
   return new ApolloClient({
     connectToDevTools: process.browser,

@@ -31,9 +31,9 @@
     "fs-jetpack": false
   },
   "files": [
-   "dist/",
-   "withData.js",
-   "link.js"
+    "dist/",
+    "withData.js",
+    "link.js"
   ],
   "homepage": "https://github.com/hobochild/next-static-tools#readme",
   "dependencies": {
@@ -46,7 +46,8 @@
     "isomorphic-fetch": "^2.2.1",
     "prop-types": "^15.5.8",
     "prop-types-exact": "^1.1.1",
-    "react-apollo": "^2.0.0"
+    "react-apollo": "^2.0.0",
+    "sw-precache": "^5.2.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

@@ -2,6 +2,10 @@
 const isDev = process.env.NEXT_STATIC_TOOLS_TEST_REPO ? true : false
 const TEST_REPO = process.env.NEXT_STATIC_TOOLS_TEST_REPO
 const relativeResolve = p => require.resolve(`${TEST_REPO}/node_modules/next/${p}`)
+const { resolve, join  } = require('path')
+
+const p = join(resolve('.'), '.next', 'next-static-tools.json')
+console.log(p)
 
 const devConfig = () => {
   return {
