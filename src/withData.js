@@ -7,13 +7,40 @@ import fs from 'fs-jetpack'
 import { isExport, getComponentDisplayName, getBuildId } from './utils'
 import { resolve } from 'path'
 
+const Fragment =
+  React.Fragment ||
+  function Fragment({ children }) {
+    return children
+  }
+
 const getFileName = name => (name.endsWith('/') ? `${name}index` : name)
+
+const Config = ({ options }) => {
+  return (
+    <Fragment>
+      {options ? (
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `__NEXT_STATIC_TOOLS__ = ${JSON.stringify(options)}`
+          }}
+        />
+      ) : (
+        <div />
+      )}
+    </Fragment>
+  )
+}
+
+Config.propTypes = {
+  options: PropTypes.object.isRequired
+}
 
 export default ComposedComponent => {
   return class WithData extends React.Component {
     static displayName = `WithData(${getComponentDisplayName(
       ComposedComponent
     )})`
+
     static propTypes = {
       serverState: PropTypes.object.isRequired
     }
@@ -30,7 +57,10 @@ export default ComposedComponent => {
       // Run all GraphQL queries in the component tree
       // and extract the resulting data
       if (!process.browser) {
-        const apollo = initApollo()
+        const options = JSON.parse(process.env.__NEXT_STATIC_TOOLS__)
+        const apollo = initApollo({
+          options 
+        })
         // Provide the `url` prop data in case a GraphQL query uses it
         try {
           // Run all GraphQL queries
@@ -43,7 +73,8 @@ export default ComposedComponent => {
           // Prevent Apollo Client GraphQL errors from crashing SSR.
           // Handle them in components via the data.error prop:
           // http://dev.apollodata.com/react/api-queries.html#graphql-query-data-error
-          // console.log(error)
+          // eslint-disable-next-line no-console
+          console.log(error)
         }
         // getDataFromTree does not call componentWillUnmount
         // head side effect therefore need to be cleared manually
@@ -65,7 +96,8 @@ export default ComposedComponent => {
 
         // Extract query data from the Apollo store
         serverState = {
-          data: apollo.cache.extract()
+          data: apollo.cache.extract(),
+          options
         }
       } else {
         if (process.browser && isExport()) {
@@ -92,10 +124,22 @@ export default ComposedComponent => {
       this.apollo = initApollo(this.props.serverState)
     }
 
+    componentDidMount() {
+      if ('serviceWorker' in navigator) {
+        //        navigator.serviceWorker.register("/sw.js")
+        //         .catch(err => console.error("Service worker registration failed", err));
+      } else {
+        //  console.log("Service worker not supported");
+      }
+    }
+
     render() {
       return (
         <ApolloProvider client={this.apollo}>
-          <ComposedComponent {...this.props} />
+          <div>
+            <ComposedComponent {...this.props} />
+            <Config options={this.props.serverState.options} />
+          </div>
         </ApolloProvider>
       )
     }
