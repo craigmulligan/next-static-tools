@@ -32,7 +32,7 @@ const Config = ({ options }) => {
 }
 
 Config.propTypes = {
-  options: PropTypes.object.isRequired
+  options: PropTypes.object
 }
 
 export default ComposedComponent => {
@@ -59,7 +59,7 @@ export default ComposedComponent => {
       if (!process.browser) {
         const options = JSON.parse(process.env.__NEXT_STATIC_TOOLS__)
         const apollo = initApollo({
-          options 
+          options
         })
         // Provide the `url` prop data in case a GraphQL query uses it
         try {

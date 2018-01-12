@@ -34,10 +34,12 @@ const writeServiceWorker = rootDir => {
           rootDir + '/**/*.{js,.json,html,css,png,jpg,gif,svg,eot,ttf,woff}'
         ],
         stripPrefix: rootDir,
-        runtimeCaching: [{
-          urlPattern: /(.*)/,
-          handler: 'networkFirst'
-        }]
+        runtimeCaching: [
+          {
+            urlPattern: /(.*)/,
+            handler: 'networkFirst'
+          }
+        ]
       },
       (err, data) => {
         if (err) {
@@ -53,7 +55,7 @@ export default async ({ typeDefs, resolvers, app, options }) => {
   const defaults = {
     playground: '/playground',
     endpoint: '/graphql',
-    port: 4000
+    port: 5000
   }
 
   options = {
