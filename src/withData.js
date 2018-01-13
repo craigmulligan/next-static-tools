@@ -130,6 +130,7 @@ export default ComposedComponent => {
           .register('/service-worker.js')
           // eslint-disable-next-line no-console
           .catch(err =>
+            // eslint-disable-next-line no-console
             console.error('Service worker registration failed', err)
           )
       } else {

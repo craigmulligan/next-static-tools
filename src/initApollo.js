@@ -4,10 +4,10 @@ import { InMemoryCache } from 'apollo-cache-inmemory'
 import fetch from 'isomorphic-fetch'
 import { isExport } from './utils'
 import get from 'lodash/get'
-import { onError } from "apollo-link-error";
+import { onError } from 'apollo-link-error'
 import errorOverlay from 'apollo-error-overlay'
- 
-const errorLink = onError((errors) => {
+
+const errorLink = onError(errors => {
   errorOverlay(errors)
   //if (networkError) errorOverlay(`[Network error]: ${networkError}`);
 })
@@ -36,11 +36,11 @@ function create(initialState = {}) {
   const endpoint = options.endpoint || '/graphql' // this too.
 
   const link = new HttpLink({
-      uri: `http://localhost:${port}${endpoint}`, // Server URL (must be absolute)
-      opts: {
-        credentials: 'same-origin' // Additional fetch() options like `credentials` or `headers`
-      }
-    })
+    uri: `http://localhost:${port}${endpoint}`, // Server URL (must be absolute)
+    opts: {
+      credentials: 'same-origin' // Additional fetch() options like `credentials` or `headers`
+    }
+  })
 
   return new ApolloClient({
     connectToDevTools: process.browser,
