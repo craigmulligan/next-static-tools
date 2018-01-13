@@ -31,14 +31,15 @@
     "fs-jetpack": false
   },
   "files": [
-   "dist/",
-   "withData.js",
-   "link.js"
+    "dist/",
+    "withData.js",
+    "link.js"
   ],
   "homepage": "https://github.com/hobochild/next-static-tools#readme",
   "dependencies": {
     "apollo-client-preset": "^1.0.1",
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "apollo-error-overlay": "^1.0.1",
+    "apollo-link-error": "^1.0.3",
     "fs-jetpack": "^1.2.0",
     "graphql": "^0.12.3",
     "graphql-tag": "^2.5.0",
@@ -46,13 +47,15 @@
     "isomorphic-fetch": "^2.2.1",
     "prop-types": "^15.5.8",
     "prop-types-exact": "^1.1.1",
-    "react-apollo": "^2.0.0"
+    "react-apollo": "^2.0.0",
+    "sw-precache": "^5.2.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-eslint": "7",
     "babel-plugin-module-resolver": "^3.0.0",
     "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "eslint": "^4.14.0",
     "eslint-config-prettier": "^2.9.0",
     "eslint-plugin-react": "^7.5.1",
