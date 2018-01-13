@@ -125,7 +125,7 @@ export default ComposedComponent => {
     }
 
     componentDidMount() {
-      if ('serviceWorker' in navigator && isExport) {
+      if ('serviceWorker' in navigator && isExport()) {
         navigator.serviceWorker
           .register('/service-worker.js')
           // eslint-disable-next-line no-console

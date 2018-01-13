@@ -1,6 +1,9 @@
 const { parse } = require('url')
 const { GraphQLServer } = require('graphql-yoga')
 const swPrecache = require('sw-precache')
+import {
+  isExport
+} from './utils'
 
 const middleware = (handle, options) => (req, res, next) => {
   const parsedUrl = parse(req.url, true)
@@ -56,8 +59,9 @@ export default async ({ typeDefs, resolvers, app, options }) => {
 
   process.env.__NEXT_STATIC_TOOLS__ = JSON.stringify(options)
 
+  console.log(app)
   const server = new GraphQLServer({ typeDefs, resolvers })
-  await writeServiceWorker(options.outdir)
+  isExport && await writeServiceWorker(options.outdir)
   server.express.use(middleware(app.getRequestHandler(), options))
   server.start(options, () =>
     // eslint-disable-next-line no-console
