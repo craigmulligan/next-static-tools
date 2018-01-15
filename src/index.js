@@ -1,23 +1,13 @@
-const { parse } = require('url')
-const { GraphQLServer } = require('graphql-yoga')
-const swPrecache = require('sw-precache')
-import { isExport } from './utils'
+import express from 'express'
+import bodyParser from 'body-parser'
+import { graphqlExpress, graphiqlExpress } from 'apollo-server-express'
+import { makeExecutableSchema } from 'graphql-tools'
+import swPrecache from 'sw-precache'
+import webpack from 'webpack'
+import defaults from './defaults'
+import asyncOnExit from 'async-on-exit'
 
-const middleware = (handle, options) => (req, res, next) => {
-  const parsedUrl = parse(req.url, true)
-  const { pathname } = parsedUrl
-
-  if (
-    pathname.startsWith(options.playground) ||
-    pathname.startsWith(options.endpoint)
-  ) {
-    next()
-  } else if (pathname === '__NEXT_STATIC_TOOLS__') {
-    res.send(options)
-  } else {
-    handle(req, res, parsedUrl)
-  }
-}
+const server = express()
 
 const writeServiceWorker = rootDir => {
   return new Promise((resolve, reject) => {
@@ -42,26 +32,53 @@ const writeServiceWorker = rootDir => {
   })
 }
 
-export default async ({ typeDefs, resolvers, app, options }) => {
-  const defaults = {
-    playground: '/playground',
-    endpoint: '/graphql',
-    port: 5000,
-    outdir: './out'
-  }
+const getWebpack = (options, userConfig) => {
+  return async (config, nextOpts) => {
+    if (userConfig) {
+      // if the user defines a webpack config fn we need to run it first
+      config = await userConfig(config, nextOpts)
+    }
 
+    config.plugins.push(
+      new webpack.DefinePlugin({
+        'process.env.__NEXT_STATIC_TOOLS__': JSON.stringify(options)
+      })
+    )
+
+    return config
+  }
+}
+
+export default async ({ typeDefs, app, resolvers, options }) => {
   options = {
     ...defaults,
     ...options
   }
 
+  app.config.webpack = getWebpack(options, app.config.webpack)
   process.env.__NEXT_STATIC_TOOLS__ = JSON.stringify(options)
 
-  const server = new GraphQLServer({ typeDefs, resolvers })
-  isExport && (await writeServiceWorker(options.outdir))
-  server.express.use(middleware(app.getRequestHandler(), options))
-  server.start(options, () =>
-    // eslint-disable-next-line no-console
-    console.log(`server is running on http://localhost:${options.port}`)
-  )
+  const schema = makeExecutableSchema({ typeDefs, resolvers })
+
+  server.use(options.endpoint, bodyParser.json(), graphqlExpress({ schema }))
+  server.use(
+    options.playground,
+    graphiqlExpress({ endpointURL: options.endpoint })
+  ) // if you want GraphiQL enabled
+
+  server.start = cb => {
+    // lastly add next.js request handler
+    server.use(app.getRequestHandler())
+    server.listen(options.port)
+    typeof cb === 'function' && cb(options)
+  }
+
+  asyncOnExit(() => {
+    // this is a hack so that we can write out service worker file to the output dir *after* it's rimraffed
+    if (!app.dev) {
+      return writeServiceWorker(options.outdir)
+    }
+  })
+
+  return server
 }
