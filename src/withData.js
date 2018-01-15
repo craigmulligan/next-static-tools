@@ -7,32 +7,25 @@ import fs from 'fs-jetpack'
 import { isExport, getComponentDisplayName, getBuildId } from './utils'
 import { resolve } from 'path'
 
-const Fragment =
-  React.Fragment ||
-  function Fragment({ children }) {
-    return children
+if (!String.prototype.endsWith) {
+  String.prototype.endsWith = function(search, this_len) {
+    if (this_len === undefined || this_len > this.length) {
+      this_len = this.length
+    }
+    return this.substring(this_len - search.length, this_len) === search
   }
-
-const getFileName = name => (name.endsWith('/') ? `${name}index` : name)
-
-const Config = ({ options }) => {
-  return (
-    <Fragment>
-      {options ? (
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `__NEXT_STATIC_TOOLS__ = ${JSON.stringify(options)}`
-          }}
-        />
-      ) : (
-        <div />
-      )}
-    </Fragment>
-  )
 }
 
-Config.propTypes = {
-  options: PropTypes.object
+const getFileName = name => {
+  if (name.endsWith('/')) {
+    name = name.slice(0, -1)
+  }
+
+  if (!name) {
+    name = '/index'
+  }
+
+  return name
 }
 
 export default ComposedComponent => {
@@ -53,9 +46,14 @@ export default ComposedComponent => {
         composedInitialProps = await ComposedComponent.getInitialProps(ctx)
       }
 
-      const url = { query: ctx.query, pathname: ctx.pathname }
+      const url = {
+        query: ctx.query,
+        pathname: ctx.pathname,
+        asPath: ctx.asPath
+      }
       // Run all GraphQL queries in the component tree
       // and extract the resulting data
+
       if (!process.browser) {
         const options = JSON.parse(process.env.__NEXT_STATIC_TOOLS__)
         const apollo = initApollo({
@@ -74,17 +72,16 @@ export default ComposedComponent => {
           // Handle them in components via the data.error prop:
           // http://dev.apollodata.com/react/api-queries.html#graphql-query-data-error
           // eslint-disable-next-line no-console
-          console.log(error)
+          console.error(error)
         }
         // getDataFromTree does not call componentWillUnmount
         // head side effect therefore need to be cleared manually
         Head.rewind()
 
-        // currently you can't configure the out dir
-        const outDir = resolve('./out')
-        const cachePath = `${outDir}/static/${getBuildId(
+        const outDir = options.outdir || resolve('./out')
+        const cachePath = `${outDir}/_next/${getBuildId(
           './.next'
-        )}/data${getFileName(url.pathname)}.json`
+        )}/data/${getFileName(url.asPath || url.pathname)}.json`
 
         await fs.writeAsync(
           cachePath,
@@ -100,15 +97,21 @@ export default ComposedComponent => {
           options
         }
       } else {
-        if (process.browser && isExport()) {
+        const options = process.env.__NEXT_STATIC_TOOLS__
+        if (isExport()) {
           const clientData = await fetch(
-            `/static/${window.__NEXT_DATA__.buildId}/data${getFileName(
-              url.pathname
+            `/_next/${window.__NEXT_DATA__.buildId}/data${getFileName(
+              url.asPath || url.pathname
             )}.json`
           ).then(res => res.json())
 
           serverState = {
-            data: clientData
+            data: clientData,
+            options
+          }
+        } else {
+          serverState = {
+            options
           }
         }
       }
@@ -144,7 +147,6 @@ export default ComposedComponent => {
         <ApolloProvider client={this.apollo}>
           <div>
             <ComposedComponent {...this.props} />
-            <Config options={this.props.serverState.options} />
           </div>
         </ApolloProvider>
       )

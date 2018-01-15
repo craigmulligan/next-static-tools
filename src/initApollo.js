@@ -6,6 +6,7 @@ import { isExport } from './utils'
 import get from 'lodash/get'
 import { onError } from 'apollo-link-error'
 import errorOverlay from 'apollo-error-overlay'
+import defaults from './defaults'
 
 const errorLink = onError(errors => {
   errorOverlay(errors)
@@ -23,10 +24,8 @@ const fetchPolicy = () =>
 const getOpts = state => {
   if (get(state, 'options')) {
     return state.options
-  }
-
-  if (process.browser) {
-    return window.__NEXT_STATIC_TOOLS__
+  } else {
+    return defaults
   }
 }
 
@@ -58,17 +57,4 @@ function create(initialState = {}) {
   })
 }
 
-export default function initApollo(initialState) {
-  // Make sure to create a new client for every server-side request so that data
-  // isn't shared between connections (which would be bad)
-  if (!process.browser) {
-    return create(initialState)
-  }
-  let apolloClient
-  // Reuse client on the client-side
-  if (process.browser) {
-    apolloClient = apolloClient || create(initialState)
-  }
-
-  return apolloClient
-}
+export default create
