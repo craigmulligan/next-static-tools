@@ -15,7 +15,8 @@ const devConfig = () => {
           alias: {
             'next/link': relativeResolve('link'),
             'next/head': relativeResolve('head'),
-            'next/router': relativeResolve('router')
+            'next/router': relativeResolve('router'),
+            'next': `${TEST_REPO}/node_modules/next/`
           }
         }
     ]]
