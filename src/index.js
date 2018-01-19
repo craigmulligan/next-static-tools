@@ -5,7 +5,9 @@ import { makeExecutableSchema } from 'graphql-tools'
 import swPrecache from 'sw-precache'
 import webpack from 'webpack'
 import defaults from './defaults'
-import asyncOnExit from 'async-on-exit'
+const nextExport = require('next/dist/server/export').default
+const nextBuild = require('next/dist/server/build').default
+import next from 'next'
 
 const server = express()
 
@@ -49,13 +51,15 @@ const getWebpack = (options, userConfig) => {
   }
 }
 
-export default async ({ typeDefs, app, resolvers, options }) => {
+export default ({ typeDefs, resolvers, options }) => {
   options = {
     ...defaults,
     ...options
   }
 
+  const app = next(options)
   app.config.webpack = getWebpack(options, app.config.webpack)
+
   process.env.__NEXT_STATIC_TOOLS__ = JSON.stringify(options)
 
   const schema = makeExecutableSchema({ typeDefs, resolvers })
@@ -66,19 +70,23 @@ export default async ({ typeDefs, app, resolvers, options }) => {
     graphiqlExpress({ endpointURL: options.endpoint })
   ) // if you want GraphiQL enabled
 
-  server.start = cb => {
+  server.start = async () => {
     // lastly add next.js request handler
+    if (options.dev) {
+      await app.prepare()
+    }
     server.use(app.getRequestHandler())
     server.listen(options.port)
-    typeof cb === 'function' && cb(options)
+    return options
   }
 
-  asyncOnExit(() => {
-    // this is a hack so that we can write out service worker file to the output dir *after* it's rimraffed
-    if (!app.dev) {
-      return writeServiceWorker(options.outdir)
-    }
-  })
+  server.export = async () => {
+    await server.start()
+    await nextBuild(options.dir, options)
+    await nextExport(options.dir, options)
+    await writeServiceWorker(options.outdir)
+    return server
+  }
 
   return server
 }
