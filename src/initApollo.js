@@ -31,6 +31,7 @@ const getOpts = state => {
 
 function create(initialState = {}) {
   const options = getOpts(initialState)
+  console.log({ options })
   const port = options.port || 4000 // we should make this configurable at some point
   const endpoint = options.endpoint || '/graphql' // this too.
 

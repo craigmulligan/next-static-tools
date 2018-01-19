@@ -51,33 +51,52 @@ const getWebpack = (options, userConfig) => {
   }
 }
 
-export default ({ typeDefs, resolvers, options }) => {
-  options = {
-    ...defaults,
-    ...options
+const getClientConfig = (config) => {
+  const {
+    endpoint,
+    outdir,
+    playground,
+    port
+  } = config
+
+  return {
+    endpoint,
+    outdir,
+    playground,
+    port
+  }
+}
+
+export default (app) => {
+  const config = {
+   ...app.config,
+   ...defaults
   }
 
-  const app = next(options)
-  app.config.webpack = getWebpack(options, app.config.webpack)
+  const schema = makeExecutableSchema({ typeDefs: 
+    config.typeDefs, resolvers: config.resolvers })
 
-  process.env.__NEXT_STATIC_TOOLS__ = JSON.stringify(options)
-
-  const schema = makeExecutableSchema({ typeDefs, resolvers })
-
-  server.use(options.endpoint, bodyParser.json(), graphqlExpress({ schema }))
+  server.use(config.endpoint, bodyParser.json(), graphqlExpress({ schema }))
   server.use(
-    options.playground,
-    graphiqlExpress({ endpointURL: options.endpoint })
+    config.playground,
+    graphiqlExpress({ endpointURL: config.endpoint })
   ) // if you want GraphiQL enabled
 
-  server.start = async () => {
-    // lastly add next.js request handler
-    if (options.dev) {
+  server.start = async (port = config.port) => {
+    // set client config for server and client
+    const clientConfig = getClientConfig({ ...config, port })
+    process.env.__NEXT_STATIC_TOOLS__ = JSON.stringify(clientConfig)
+    app.config.webpack = await getWebpack(clientConfig, app.config.webpack)
+    
+    if (app.dev) {
       await app.prepare()
     }
+
+    // we assume the user has already added their middleware
+    // so we add final catchall middleware
     server.use(app.getRequestHandler())
-    server.listen(options.port)
-    return options
+    server.listen(port)
+    return port 
   }
 
   server.export = async () => {
