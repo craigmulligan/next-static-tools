@@ -5,6 +5,26 @@ import { execOnce, warn } from 'next/dist/lib/utils'
 import exact from 'prop-types-exact'
 import { format, resolve, parse } from 'url'
 
+/**
+ * @summary [Next.js Link](https://github.com/zeit/next.js/#with-link-1) component with data fetching capabilities
+ * @name Link 
+ * @public
+ * @Class
+ * @prop {Boolean} withData - Instructs component to fetch data for that page 
+ * @returns {Object} Link component 
+ * @example
+ *
+ * import Link from 'next-static-tools/link'
+ * export default (props) => {
+ *  return(
+ *   <nav>
+ *     <Link href='/'><a>Home</a></Link> // prefetches nothing 
+ *     <Link href='/contact' prefetch><a>Home</a></Link> // prefetchs component 
+ *     <Link href={ pathname='/about' query={ foo: 'bar' }} prefetch withData /> // prefetchs data and component 
+ *   </nav> 
+ *  )
+ * }
+ **/
 // extend default next/link to customize the prefetch behaviour
 export default class LinkWithData extends Link {
   // re defined Link propTypes to add `withData`

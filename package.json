@@ -11,7 +11,8 @@
     "build:watch": "babel src --watch --out-dir dist --copy-files",
     "prettier": "prettier --no-semi --single-quote --write './src/**/*.js'",
     "prettier-check": "prettier-check --no-semi --single-quote --write './src/**/*.js'",
-    "semantic-release": "semantic-release"
+    "semantic-release": "semantic-release",
+    "docs": "jsdoc2md 'src/**/*.js' > DOCUMENTATION.md"
   },
   "repository": {
     "type": "git",
@@ -68,6 +69,8 @@
     "eslint-config-prettier": "^2.9.0",
     "eslint-plugin-react": "^7.5.1",
     "jest": "^22.0.4",
+    "jsdoc": "^3.5.5",
+    "jsdoc-to-markdown": "^4.0.1",
     "prettier": "^1.9.2",
     "prettier-check": "^2.0.0",
     "semantic-release": "^11.0.2"
