@@ -57,7 +57,7 @@ export default class LinkWithData extends Link {
     // if withData prop is defined, Component exists and has getInitialProps
     // fetch the component props (the component should save it in cache)
     if (this.props.withData && Component && Component.getInitialProps) {
-      const ctx = { pathname: href, query, isVirtualCall: true }
+      const ctx = { pathname: href, query, isVirtualCall: true, asPath: this.props.as }
       await Component.getInitialProps(ctx)
     }
   }

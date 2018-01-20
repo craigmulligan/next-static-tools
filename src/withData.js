@@ -81,7 +81,7 @@ export default ComposedComponent => {
         const outDir = options.outdir || resolve('./out')
         const cachePath = `${outDir}/_next/${getBuildId(
           './.next'
-        )}/data/${getFileName(url.asPath || url.pathname)}.json`
+        )}/data${getFileName(url.asPath || url.pathname)}.json`
 
         await fs.writeAsync(
           cachePath,
@@ -99,16 +99,23 @@ export default ComposedComponent => {
       } else {
         const options = process.env.__NEXT_STATIC_TOOLS__
         if (isExport()) {
-          const clientData = await fetch(
-            `/_next/${window.__NEXT_DATA__.buildId}/data${getFileName(
-              url.asPath || url.pathname
-            )}.json`
-          ).then(res => res.json())
+          try {
+            const clientData = await fetch(
+              `/_next/${window.__NEXT_DATA__.buildId}/data${getFileName(
+                url.asPath || url.pathname
+              )}.json`
+            )
+            .then(res => res.json())
 
-          serverState = {
-            data: clientData,
-            options
+            serverState = {
+              data: clientData,
+              options
+            }
+          } catch (err) {
+            console.log(url)
+            console.log(err)
           }
+          
         } else {
           serverState = {
             options
@@ -134,11 +141,11 @@ export default ComposedComponent => {
           // eslint-disable-next-line no-console
           .catch(err =>
             // eslint-disable-next-line no-console
-            console.error('Service worker registration failed', err)
+            console.error('next-static-tools: Service worker registration failed', err)
           )
       } else {
         // eslint-disable-next-line no-console
-        console.log('Service worker not supported')
+        console.log('next-static-tools: Service worker not supported')
       }
     }
 

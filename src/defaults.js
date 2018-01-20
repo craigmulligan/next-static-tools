@@ -3,4 +3,5 @@ export default {
   endpoint: '/graphql',
   port: 4000,
   outdir: './out',
+  silent: false
 }

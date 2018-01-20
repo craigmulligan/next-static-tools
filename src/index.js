@@ -5,11 +5,10 @@ import { makeExecutableSchema } from 'graphql-tools'
 import swPrecache from 'sw-precache'
 import webpack from 'webpack'
 import defaults from './defaults'
-const nextExport = require('next/dist/server/export').default
-const nextBuild = require('next/dist/server/build').default
+import nextExport from 'next/dist/server/export'
+import nextBuild from 'next/dist/server/build'
 import next from 'next'
-
-const server = express()
+import initApollo from './initApollo'
 
 const writeServiceWorker = rootDir => {
   return new Promise((resolve, reject) => {
@@ -68,6 +67,8 @@ const getClientConfig = (config) => {
 }
 
 export default (app) => {
+  const server = express()
+
   const config = {
    ...app.config,
    ...defaults
@@ -100,10 +101,14 @@ export default (app) => {
   }
 
   server.export = async () => {
+    await app.close()
+    // options => config :/ confusing
+    const client = initApollo({ options: config }) 
+    app.config.exportPathMap = app.config.exportPathMap(client) 
     await server.start()
-    await nextBuild(options.dir, options)
-    await nextExport(options.dir, options)
-    await writeServiceWorker(options.outdir)
+    await nextBuild(app.dir, config)
+    await nextExport(app.dir, config)
+    await writeServiceWorker(config.outdir)
     return server
   }
 
