@@ -15,6 +15,7 @@ import { format, resolve, parse } from 'url'
  * @example
  *
  * import Link from 'next-static-tools/link'
+ *
  * export default (props) => {
  *  return(
  *   <nav>
