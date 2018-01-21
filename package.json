@@ -34,8 +34,7 @@
   "files": [
     "dist/",
     "withData.js",
-    "link.js",
-    "client.js"
+    "link.js"
   ],
   "homepage": "https://github.com/hobochild/next-static-tools#readme",
   "dependencies": {
