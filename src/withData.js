@@ -28,6 +28,75 @@ const getFileName = name => {
   return name
 }
 
+/**
+ * @summary HoC to wrap your pages, it provides the apollo client for data fetching
+ * @name withData
+ * @public
+ * @function
+ * @prop {Boolean} withData - Instructs component to fetch data for that page
+ * @returns {Object} Link component
+ * @example
+ * import App from '../components/App'
+ * import header from '../components/header'
+ * import posts from '../components/posts'
+ *
+ * import withData from 'next-static-tools/withData'
+ *
+ * export default withData(props => (
+ *   <App>
+ *     <Header pathname={props.url.pathname} />
+ *     <hr />
+ *     <Posts />
+ *     <hr />
+ *   </App>
+ * ))
+ *
+ * Then in components/posts.js you can use apollo client query your graphql schema
+ * import react, { component } from 'react'
+ * import { graphql } from 'react-apollo'
+ * import gql from 'graphql-tag'
+ * import Link from 'next-static-tools/link'
+ *
+ * const Posts = ({ data: { error, posts, loading } }) => {
+ *   return (
+ *     <article>
+ *       <h3>Latest Posts</h3>
+ *       {posts &&
+ *         posts.map(p => {
+ *           return (
+ *             <div key={p.id}>
+ *               <p>
+ *                 <span>{p.createdAt}</span>
+ *                 &nbsp;-&nbsp;
+ *                 <Link
+ *                   prefetch
+ *                   withData
+ *                   href={{ pathname: `/post`, query: { id: p.id } }}
+ *                   as={`/post/${p.id}`}
+ *                 >
+ *                   <a>{p.title}</a>
+ *                 </Link>
+ *               </p>
+ *             </div>
+ *           )
+ *         })}
+ *     </article>
+ *   )
+ * }
+ *
+ * // We use the gql tag to parse our query string into a query document
+ * const postsQuery = gql`
+ *   query postsQuery {
+ *     posts {
+ *       id
+ *       title
+ *       createdAt
+ *     }
+ *   }
+ * `
+ *
+ * export default graphql(postsQuery)(Posts)
+ **/
 export default ComposedComponent => {
   return class WithData extends React.Component {
     static displayName = `WithData(${getComponentDisplayName(
@@ -81,7 +150,7 @@ export default ComposedComponent => {
         const outDir = options.outdir || resolve('./out')
         const cachePath = `${outDir}/_next/${getBuildId(
           './.next'
-        )}/data/${getFileName(url.asPath || url.pathname)}.json`
+        )}/data${getFileName(url.asPath || url.pathname)}.json`
 
         await fs.writeAsync(
           cachePath,
@@ -99,15 +168,20 @@ export default ComposedComponent => {
       } else {
         const options = process.env.__NEXT_STATIC_TOOLS__
         if (isExport()) {
-          const clientData = await fetch(
-            `/_next/${window.__NEXT_DATA__.buildId}/data${getFileName(
-              url.asPath || url.pathname
-            )}.json`
-          ).then(res => res.json())
+          try {
+            const clientData = await fetch(
+              `/_next/${window.__NEXT_DATA__.buildId}/data${getFileName(
+                url.asPath || url.pathname
+              )}.json`
+            ).then(res => res.json())
 
-          serverState = {
-            data: clientData,
-            options
+            serverState = {
+              data: clientData,
+              options
+            }
+          } catch (err) {
+            // eslint-disable-next-line no-console
+            console.log(err)
           }
         } else {
           serverState = {
@@ -134,11 +208,14 @@ export default ComposedComponent => {
           // eslint-disable-next-line no-console
           .catch(err =>
             // eslint-disable-next-line no-console
-            console.error('Service worker registration failed', err)
+            console.error(
+              'next-static-tools: Service worker registration failed',
+              err
+            )
           )
       } else {
         // eslint-disable-next-line no-console
-        console.log('Service worker not supported')
+        console.log('next-static-tools: Service worker not supported')
       }
     }
 

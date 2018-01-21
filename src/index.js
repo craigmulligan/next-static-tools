@@ -1,3 +1,6 @@
+/**
+ * @module next-static-tools
+ */
 import express from 'express'
 import bodyParser from 'body-parser'
 import { graphqlExpress, graphiqlExpress } from 'apollo-server-express'
@@ -5,11 +8,10 @@ import { makeExecutableSchema } from 'graphql-tools'
 import swPrecache from 'sw-precache'
 import webpack from 'webpack'
 import defaults from './defaults'
-const nextExport = require('next/dist/server/export').default
-const nextBuild = require('next/dist/server/build').default
-import next from 'next'
-
-const server = express()
+import nextExport from 'next/dist/server/export'
+import nextBuild from 'next/dist/server/build'
+import initApollo from './initApollo'
+import nextGetConfig from 'next/dist/server/config'
 
 const writeServiceWorker = rootDir => {
   return new Promise((resolve, reject) => {
@@ -34,16 +36,29 @@ const writeServiceWorker = rootDir => {
   })
 }
 
-const getWebpack = (options, userConfig) => {
+const getClientConfig = config => {
+  const { endpoint, outdir, playground, port } = config
+
+  return {
+    endpoint,
+    outdir,
+    playground,
+    port
+  }
+}
+
+const getWebpack = userConfig => {
   return async (config, nextOpts) => {
-    if (userConfig) {
+    if (userConfig.webpack) {
       // if the user defines a webpack config fn we need to run it first
-      config = await userConfig(config, nextOpts)
+      config = await userConfig.webpack(config, nextOpts)
     }
 
     config.plugins.push(
       new webpack.DefinePlugin({
-        'process.env.__NEXT_STATIC_TOOLS__': JSON.stringify(options)
+        'process.env.__NEXT_STATIC_TOOLS__': JSON.stringify(
+          getClientConfig(config)
+        )
       })
     )
 
@@ -51,42 +66,134 @@ const getWebpack = (options, userConfig) => {
   }
 }
 
-export default ({ typeDefs, resolvers, options }) => {
-  options = {
-    ...defaults,
-    ...options
+const prepConfig = config => {
+  // set client config for server and client
+  // make client config available to webpack build
+  const clientConfig = getClientConfig(config)
+  process.env.__NEXT_STATIC_TOOLS__ = JSON.stringify(clientConfig)
+  config.webpack = getWebpack(clientConfig, config.webpack)
+
+  // make the client available to the exportPathsFn
+  const client = initApollo({ options: config })
+  const exportPathsFn = config.exportPathMap
+  config.exportPathMap = () => {
+    return exportPathsFn(client)
   }
 
-  const app = next(options)
-  app.config.webpack = getWebpack(options, app.config.webpack)
+  return config
+}
 
-  process.env.__NEXT_STATIC_TOOLS__ = JSON.stringify(options)
+class Server {
+  constructor(app) {
+    this.config = prepConfig({
+      ...defaults,
+      ...app.config
+    })
 
-  const schema = makeExecutableSchema({ typeDefs, resolvers })
+    this.express = express()
+    this.nextApp = app
+    this.nextApp.config = this.config
 
-  server.use(options.endpoint, bodyParser.json(), graphqlExpress({ schema }))
-  server.use(
-    options.playground,
-    graphiqlExpress({ endpointURL: options.endpoint })
-  ) // if you want GraphiQL enabled
+    const schema = makeExecutableSchema({
+      typeDefs: this.config.typeDefs,
+      resolvers: this.config.resolvers
+    })
 
-  server.start = async () => {
-    // lastly add next.js request handler
-    if (options.dev) {
-      await app.prepare()
+    this.express.use(
+      this.config.endpoint,
+      bodyParser.json(),
+      graphqlExpress({ schema })
+    )
+    this.express.use(
+      this.config.playground,
+      graphiqlExpress({ endPointUrl: this.config.endpoint })
+    )
+  }
+
+  get(path, callback) {
+    return this.express.get(path, callback)
+  }
+
+  use(path, callback) {
+    return this.express.use(path, callback)
+  }
+
+  post(path, callback) {
+    return this.express.post(path, callback)
+  }
+
+  start = async () => {
+    if (this.nextApp.prepare && this.nextApp.dev) {
+      await this.nextApp.prepare()
+      this.express.use(this.nextApp.getRequestHandler())
     }
-    server.use(app.getRequestHandler())
-    server.listen(options.port)
-    return options
-  }
 
-  server.export = async () => {
-    await server.start()
-    await nextBuild(options.dir, options)
-    await nextExport(options.dir, options)
-    await writeServiceWorker(options.outdir)
-    return server
+    this.express.listen(this.config.port)
+    return this.config.port
   }
+}
 
-  return server
+/**
+ * @summary Stand up next.js + graphql server
+ * @name createServer
+ * @public
+ * @function
+ * @param {Object} app - A next.js app instance
+ * @returns {Object} Server - An instance of Server
+ * @example
+ * import next from 'next'
+ * import { createServer } from 'next-static-tools'
+ *
+ * const dev = process.env.NODE_ENV !== 'production'
+ * const app = next({ dev })
+ * const server = createServer(app)
+ * // add yo custom middleware
+ * server.get('/post/:id', (req, res) => {
+ *   return app.render(req, res, '/post', {
+ *     id: req.params.id
+ *   })
+ * })
+ *
+ * server
+ *   .start()
+ *   .then(port => console.log(`server on http://localhost:${port}`))
+ *   .catch(console.err)
+ **/
+export const createServer = app => {
+  return new Server(app)
+}
+
+/**
+ * @summary Build and export static site
+ * @name build
+ * @public
+ * @function
+ * @param {String} dir
+ * @param {Object} config the same object you would use in next.config.js - default {}
+ * @returns {Promise}
+ * @example
+ * build()
+ *   .then(() => process.exit())
+ *   .catch(err => {
+ *     console.log(err)
+ *     process.exit(1)
+ *   })
+ *
+ **/
+export const build = async (dir = process.cwd(), configuration) => {
+  const config = prepConfig({
+    ...defaults,
+    ...nextGetConfig(dir, configuration)
+  })
+
+  // start graphql so it's accessible when exporting
+  const server = new Server({ config })
+  await server.start()
+
+  await nextBuild(dir, config)
+  // we have merged options & config
+  // it seems saner way to manage things,
+  // but we still have to pass both objects to next
+  await nextExport(dir, config, config)
+  await writeServiceWorker(config.outdir)
 }

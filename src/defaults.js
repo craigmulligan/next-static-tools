@@ -1,9 +1,7 @@
 export default {
   playground: '/playground',
   endpoint: '/graphql',
-  port: 4000,
+  port: 3000,
   outdir: './out',
-  dev: true,
-  dir: process.cwd(),
   silent: false
 }
