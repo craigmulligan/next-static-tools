@@ -30,6 +30,43 @@ NB: If you don't know graphql or don't want to learn, this tool isn't for you.
 yarn add react react-dom next next-static-tools
 ```
 
+Add your graphql definitions and schema via `next.config.js`.
+```javascript
+// next.config.js
+const gql = require('graphql-tag')
+
+const typeDefs = `
+  type Query {
+    hello(name: String): String 
+  }
+`
+
+const resolvers = {
+  Query: {
+    hello: (_, { name }) => `hello ${name}` 
+  }
+}
+
+
+module.exports = {
+  exportPathMap: async client => {
+    const query($name: String) = gql`
+      query greeting {
+        hello(name: $name) 
+      }
+    `
+
+    const { data } = await client.query({ query, variables: name: "hobochild" })
+
+      return {
+        '/': { page: '/', query: { greeting: data  } },
+      }
+    )
+  },
+}
+```
+
+Then run the server/build process.
 ```javascript
 const yargs = require('yargs')
 const next = require('next')
