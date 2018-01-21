@@ -13,7 +13,7 @@ Here is an [example](https://github.com/hobochild/with-next-static-tools) of how
  - Familiar next.js workflow
 
 ## How does it work? 
-You provide a graphql schema and `next-static-tools` stands up a graphql server, during development you can query this server directly like a regular web app. However when you build your static site, we write out the queries and their results to JSON files and configure the client to fetch data from the served JSON instead of the graphql server. Which allows you to use Apollo in your in your next.js static websites :)
+You provide a graphql schema and `next-static-tools` stands up a graphql server, during development you can query this server directly like a regular web app. However when you build your static site, we write out the queries and their results to JSON files and configure the client to fetch data from the served JSON instead of the graphql server in production. Which allows you to use Apollo in your in your next.js static websites :)
 
 ## Why? 
 I built `next-static-tools` because I love the way graphql allows you to query arbitrary data in a uniform way. It's a powerful tool to have when building static sites where data often comes from random sources. I don't like how many static site generators rely on conventions to organise your data or abstract the data model behind plugins. 
@@ -25,6 +25,7 @@ NB: If you don't know graphql or don't want to learn, this tool isn't for you.
 
 - [Documentation](DOCUMENTATION.md) 
 - [Example](https://github.com/hobochild/with-next-static-tools) 
+- [Blog post](https://medium.com/@hobochild/introducing-next-static-tools-47d01dfa9daf)
 
 ```
 yarn add react react-dom next next-static-tools
