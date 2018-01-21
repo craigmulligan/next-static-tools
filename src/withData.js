@@ -30,18 +30,18 @@ const getFileName = name => {
 
 /**
  * @summary HoC to wrap your pages, it provides the apollo client for data fetching
- * @name withData 
+ * @name withData
  * @public
  * @function
- * @prop {Boolean} withData - Instructs component to fetch data for that page 
- * @returns {Object} Link component 
+ * @prop {Boolean} withData - Instructs component to fetch data for that page
+ * @returns {Object} Link component
  * @example
  * import App from '../components/App'
  * import header from '../components/header'
  * import posts from '../components/posts'
- * 
+ *
  * import withData from 'next-static-tools/withData'
- * 
+ *
  * export default withData(props => (
  *   <App>
  *     <Header pathname={props.url.pathname} />
@@ -50,13 +50,13 @@ const getFileName = name => {
  *     <hr />
  *   </App>
  * ))
- * 
- * Then in components/posts.js you can use apollo client query your graphql schema 
+ *
+ * Then in components/posts.js you can use apollo client query your graphql schema
  * import react, { component } from 'react'
  * import { graphql } from 'react-apollo'
  * import gql from 'graphql-tag'
  * import Link from 'next-static-tools/link'
- * 
+ *
  * const Posts = ({ data: { error, posts, loading } }) => {
  *   return (
  *     <article>
@@ -83,7 +83,7 @@ const getFileName = name => {
  *     </article>
  *   )
  * }
- * 
+ *
  * // We use the gql tag to parse our query string into a query document
  * const postsQuery = gql`
  *   query postsQuery {
@@ -94,7 +94,7 @@ const getFileName = name => {
  *     }
  *   }
  * `
- * 
+ *
  * export default graphql(postsQuery)(Posts)
  **/
 export default ComposedComponent => {
@@ -173,18 +173,16 @@ export default ComposedComponent => {
               `/_next/${window.__NEXT_DATA__.buildId}/data${getFileName(
                 url.asPath || url.pathname
               )}.json`
-            )
-            .then(res => res.json())
+            ).then(res => res.json())
 
             serverState = {
               data: clientData,
               options
             }
           } catch (err) {
-            console.log(url)
+            // eslint-disable-next-line no-console
             console.log(err)
           }
-          
         } else {
           serverState = {
             options
@@ -210,7 +208,10 @@ export default ComposedComponent => {
           // eslint-disable-next-line no-console
           .catch(err =>
             // eslint-disable-next-line no-console
-            console.error('next-static-tools: Service worker registration failed', err)
+            console.error(
+              'next-static-tools: Service worker registration failed',
+              err
+            )
           )
       } else {
         // eslint-disable-next-line no-console
