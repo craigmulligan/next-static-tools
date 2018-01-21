@@ -23,8 +23,8 @@ NB: If you don't know graphql or don't want to learn, this tool isn't for you.
 
 ## Usage: 
 
-[Documentation](DOCUMENTATION.md) 
-[Example](https://github.com/hobochild/with-next-static-tools) 
+- [Documentation](DOCUMENTATION.md) 
+- [Example](https://github.com/hobochild/with-next-static-tools) 
 
 ```
 yarn add react react-dom next next-static-tools

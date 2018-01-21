@@ -64,7 +64,6 @@ server
 ### next-static-tools~build(dir, config) ⇒ <code>Promise</code>
 **Kind**: inner method of [<code>next-static-tools</code>](#module_next-static-tools)  
 **Summary**: Build and export static site  
-**Returns**: <code>Promise</code> - token - Newly set Idm Authentication token  
 **Access**: public  
 
 | Param | Type | Description |
@@ -123,7 +122,7 @@ export default withData(props => (
   </App>
 ))
 
-Then in components/posts.js you can use apollo client query your graphql schema 
+Then in components/posts.js you can use apollo client query your graphql schema
 import react, { component } from 'react'
 import { graphql } from 'react-apollo'
 import gql from 'graphql-tag'
