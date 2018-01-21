@@ -51,12 +51,9 @@
     "graphql-tag": "^2.5.0",
     "graphql-tools": "^2.18.0",
     "isomorphic-fetch": "^2.2.1",
-    "next": "^4.2.3",
     "prop-types": "^15.5.8",
     "prop-types-exact": "^1.1.1",
-    "react": "^16.2.0",
     "react-apollo": "^2.0.0",
-    "react-dom": "^16.2.0",
     "sw-precache": "^5.2.0"
   },
   "devDependencies": {
